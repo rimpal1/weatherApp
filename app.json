@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "weatherApp",
+    "slug": "weatherApp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/splashpage.png",
+    "splash": {
+      "image": "./assets/splashpage.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true
+    },
+    "web": {
+      "favicon": "./assets/splashpage.png"
+    }
+  }
+}
