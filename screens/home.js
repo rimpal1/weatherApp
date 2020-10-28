@@ -13,6 +13,7 @@ const Home = ({ navigation }) => {
   const [weatherResponse, setWeatherResponse] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
 
+
   React.useLayoutEffect(() => {
     if (errorMsg !== null)
       navigation.setOptions({
@@ -262,7 +263,7 @@ const Home = ({ navigation }) => {
                     }}
                   >
                     <Text style={styles.dailyDay}>{getDay(item.dt)}</Text>
-                    <Text style={styles.dailyPop}>{item.pop * 100}%</Text>
+                    <Text style={styles.dailyPop}>{(item.pop * 100).toFixed()}%</Text>
                     <Image
                       style={styles.smallImage}
                       source={{
