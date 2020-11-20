@@ -8,16 +8,15 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import moment from "moment";
 import * as SplashScreen from "expo-splash-screen";
 
-const Home = ({ navigation }) => {
+const Home = ({ navigation, route }) => {
   const [location, setLocation] = useState(null);
   const [weatherResponse, setWeatherResponse] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
 
-
   React.useLayoutEffect(() => {
     if (errorMsg !== null)
       navigation.setOptions({
-        headerShown: false
+        headerShown: false,
       });
   }, [errorMsg]);
 
@@ -34,25 +33,34 @@ const Home = ({ navigation }) => {
     }
   }, [location]);
 
+  useEffect(() => {
+    if (route.params?.locationDetail) {
+      let { lat, lon, city } = route.params.locationDetail;
+      setLocation({ lon, lat, city });
+    }
+  }, [route.params?.locationDetail]);
+
   const getCurrentLocation = async () => {
     let { status } = await Location.requestPermissionsAsync();
     if (status !== "granted") {
       setErrorMsg({
         text: "Permission to access location was denied",
-
-        description: `Please grant the permission by going in "Settings -> Privacy -> Location Services and retry".`
+        description: `Please grant the permission by going in "Settings -> Privacy -> Location Services and retry".`,
       });
       return;
     }
+
     let location = await Location.getCurrentPositionAsync({});
+
     const place = await Location.reverseGeocodeAsync({
       latitude: location.coords.latitude,
-      longitude: location.coords.longitude
+      longitude: location.coords.longitude,
     });
+
     setLocation({
       lon: location.coords.longitude,
       lat: location.coords.latitude,
-      city: place[0].city
+      city: place[0].city,
     });
   };
 
@@ -61,11 +69,11 @@ const Home = ({ navigation }) => {
     return moment.unix(unixTs).format("ddd, MMMM D");
   };
 
-  const getHours = unix => {
+  const getHours = (unix) => {
     return moment.unix(unix).format("h A");
   };
 
-  const getDay = unix => {
+  const getDay = (unix) => {
     return moment.unix(unix).format("ddd");
   };
 
@@ -74,14 +82,14 @@ const Home = ({ navigation }) => {
     const url = `https://api.openweathermap.org/data/2.5/onecall?lat=${location.lat}&lon=${location.lon}&units=imperial&appid=f68a2c64528807e012d6fe72a8755f7e`;
     axios
       .get(url)
-      .then(res => {
+      .then((res) => {
         setWeatherResponse(res.data);
       })
-      .catch(error => {
+      .catch((error) => {
         setErrorMsg({
           text: "Uh oh",
           description:
-            "Something went wrong. Please come back later and try again."
+            "Something went wrong. Please come back later and try again.",
         });
       });
   };
@@ -109,7 +117,7 @@ const Home = ({ navigation }) => {
               <Image
                 style={styles.mainImage}
                 source={{
-                  uri: `http://openweathermap.org/img/wn/${weatherResponse.current.weather[0].icon}@4x.png`
+                  uri: `http://openweathermap.org/img/wn/${weatherResponse.current.weather[0].icon}@4x.png`,
                 }}
               />
               <Text style={styles.mainTemp}>
@@ -121,7 +129,7 @@ const Home = ({ navigation }) => {
                 paddingLeft: 6,
                 display: "flex",
                 flexDirection: "row",
-                justifyContent: "center"
+                justifyContent: "center",
                 // alignItems: "center"
               }}
             >
@@ -186,7 +194,7 @@ const Home = ({ navigation }) => {
                 display: "flex",
                 flexDirection: "row",
                 alignItems: "center",
-                marginBottom: 25
+                marginBottom: 25,
               }}
             >
               <Text style={styles.hoursText}>HOURLY</Text>
@@ -209,14 +217,14 @@ const Home = ({ navigation }) => {
                       display: "flex",
                       justifyContent: "space-evenly",
                       alignItems: "center",
-                      marginBottom: 10
+                      marginBottom: 10,
                     }}
                   >
                     <Text style={styles.hourlyTime}>{getHours(item.dt)}</Text>
                     <Image
                       style={styles.smallImage}
                       source={{
-                        uri: `http://openweathermap.org/img/wn/${item.weather[0].icon}@4x.png`
+                        uri: `http://openweathermap.org/img/wn/${item.weather[0].icon}@4x.png`,
                       }}
                     />
                     <Text style={styles.hourlyTemp}>
@@ -235,7 +243,7 @@ const Home = ({ navigation }) => {
                 display: "flex",
                 flexDirection: "row",
                 alignItems: "center",
-                marginVertical: 20
+                marginVertical: 20,
               }}
             >
               <Text style={styles.sevenDaysText}>NEXT 7 DAYS</Text>
@@ -259,15 +267,17 @@ const Home = ({ navigation }) => {
                       justifyContent: "flex-start",
                       alignItems: "center",
                       flexDirection: "column",
-                      marginBottom: 10
+                      marginBottom: 10,
                     }}
                   >
                     <Text style={styles.dailyDay}>{getDay(item.dt)}</Text>
-                    <Text style={styles.dailyPop}>{(item.pop * 100).toFixed()}%</Text>
+                    <Text style={styles.dailyPop}>
+                      {(item.pop * 100).toFixed()}%
+                    </Text>
                     <Image
                       style={styles.smallImage}
                       source={{
-                        uri: `http://openweathermap.org/img/wn/${item.weather[0].icon}@4x.png`
+                        uri: `http://openweathermap.org/img/wn/${item.weather[0].icon}@4x.png`,
                       }}
                     />
                     <Text style={styles.dailyHigh}>
@@ -311,7 +321,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     marginVertical: 60,
     flexDirection: "column",
-    display: "flex"
+    display: "flex",
   },
   headerLocation: {
     display: "flex",
@@ -320,14 +330,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     alignItems: "center",
     marginVertical: 10,
-    paddingBottom: 55
+    paddingBottom: 55,
   },
   innerHeaderLocation: {
     flexDirection: "row",
-    margin: 3
+    margin: 3,
   },
   innerHeaderMargin: {
-    margin: 1
+    margin: 1,
   },
   currentWeatherDetail: {
     display: "flex",
@@ -337,7 +347,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderRadius: 10,
-    width: "100%"
+    width: "100%",
   },
   hourlyWeather: {
     display: "flex",
@@ -347,7 +357,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 40,
     borderRadius: 10,
-    width: "100%"
+    width: "100%",
   },
   dailyWeather: {
     flex: 2,
@@ -357,73 +367,75 @@ const styles = StyleSheet.create({
     textAlign: "center",
     alignItems: "center",
     borderRadius: 10,
-    width: "100%"
+    width: "100%",
   },
   innnerTemperature: {
     flexDirection: "row",
     textAlign: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   mainImage: {
     width: 110,
-    height: 110
+    height: 110,
+    left: 5,
   },
   smallImage: {
     width: 60,
-    height: 60
+    height: 60,
   },
   mainTemp: {
     fontSize: 55,
     color: "#fff",
-    fontWeight: "300"
+    fontWeight: "300",
+    right: 5,
   },
   markerIcon: {},
 
   textTitle: {
     color: "#fff",
-    fontWeight: "700"
+    fontWeight: "700",
   },
   currentWeatherDetailText: {
     color: "#fff",
     fontWeight: "300",
     fontSize: 16,
     alignSelf: "center",
-    marginTop: 5
+    marginTop: 5,
   },
   currentWeatherDetailIcon: {
-    alignSelf: "center"
+    alignSelf: "center",
   },
   divider: {
     borderLeftWidth: 1,
     borderLeftColor: "rgba(255, 255, 255, 0.3)",
-    height: 100
+    height: 100,
   },
   dailyDividerText: {
     borderTopWidth: 1,
     borderTopColor: "rgba(255, 255, 255, 0.2)",
-    width: 280
+    width: 280,
   },
   sevenDaysText: {
     color: "#fff",
     fontWeight: "400",
-    marginHorizontal: 10
+    marginHorizontal: 10,
   },
   HourlyDividerText: {
     borderTopWidth: 1,
     borderTopColor: "rgba(255, 255, 255, 0.2)",
-    width: 310
+    width: 310,
   },
   hoursText: {
     color: "#fff",
     fontWeight: "400",
-    marginHorizontal: 10
+    marginHorizontal: 10,
   },
   hourlyTime: {
     color: "#fff",
     fontWeight: "300",
     fontSize: 16,
     alignSelf: "center",
-    marginBottom: 10
+    marginBottom: 10,
   },
   hourlyTemp: {
     color: "#fff",
@@ -431,34 +443,34 @@ const styles = StyleSheet.create({
     fontSize: 16,
     alignSelf: "center",
     textAlign: "center",
-    marginTop: 14
+    marginTop: 14,
   },
   descriptionText: {
     color: "#fff",
     fontWeight: "500",
     textTransform: "capitalize",
     fontSize: 17,
-    marginTop: -10
+    marginTop: -10,
   },
   textDate: {
     color: "#fff",
     fontWeight: "300",
     fontSize: 12,
-    paddingLeft: 12
+    paddingLeft: 12,
   },
   dailyDay: {
     color: "#fff",
     fontWeight: "400",
     fontSize: 16,
     alignSelf: "center",
-    marginBottom: 8
+    marginBottom: 8,
   },
   dailyPop: {
     color: "#fff",
     fontWeight: "400",
     fontSize: 14,
     alignSelf: "center",
-    marginBottom: -5
+    marginBottom: -5,
   },
   dailyHigh: {
     color: "#fff",
@@ -466,7 +478,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     alignSelf: "center",
     marginVertical: -5,
-    marginBottom: 3
+    marginBottom: 3,
   },
   dailyLow: {
     color: "#fff",
@@ -474,12 +486,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     alignSelf: "center",
     marginBottom: 5,
-    marginTop: 3
+    marginTop: 3,
   },
   dailyUnderscore: {
     borderTopWidth: 1,
     borderTopColor: "rgba(255, 255, 255, 0.9)",
-    width: 25
+    width: 25,
   },
   errorContainer: {
     alignItems: "center",
@@ -492,7 +504,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderRadius: 20,
     padding: 15,
-    marginTop: 250
+    marginTop: 250,
   },
   errorText: {
     marginTop: 20,
@@ -500,7 +512,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "500",
     lineHeight: 25,
-    textAlign: "center"
+    textAlign: "center",
   },
   erroDescription: {
     marginTop: 10,
@@ -508,6 +520,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "400",
     lineHeight: 25,
-    textAlign: "center"
-  }
+    textAlign: "center",
+  },
 });

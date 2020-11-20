@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet } from "react-native";
+import { ScrollView , StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { Ionicons } from "@expo/vector-icons";
@@ -10,6 +10,7 @@ const Stack = createStackNavigator();
 
 export default function App() {
   return (
+   
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{
@@ -27,7 +28,7 @@ export default function App() {
                 size={22}
                 color="white"
                 style={styles.icons}
-                onPress={() => navigation.navigate("Search")}
+                onPress={() => navigation.navigate("Search",)}
               />
             )
           })}
@@ -39,11 +40,13 @@ export default function App() {
             headerTitleStyle: {
               color: "white"
             },
-            headerTintColor: "white"
+            headerTintColor: "white",
+            headerShown: false
           }}
         />
       </Stack.Navigator>
     </NavigationContainer>
+   
   );
 }
 
