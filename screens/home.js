@@ -1,10 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect } from "react";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Image, ScrollView } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
 import Container from "./container";
 import * as Location from "expo-location";
 import axios from "axios";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  Ionicons,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import moment from "moment";
 import * as SplashScreen from "expo-splash-screen";
 
@@ -12,13 +23,28 @@ const Home = ({ navigation, route }) => {
   const [location, setLocation] = useState(null);
   const [weatherResponse, setWeatherResponse] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     if (errorMsg !== null)
       navigation.setOptions({
         headerShown: false,
       });
   }, [errorMsg]);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <MaterialIcons
+          name="my-location"
+          size={22}
+          color="white"
+          style={styles.icons}
+          onPress={() => getCurrentLocation()}
+        />
+      ),
+    });
+  }, []);
 
   //only run when component mounts
   useEffect(() => {
@@ -51,12 +77,10 @@ const Home = ({ navigation, route }) => {
     }
 
     let location = await Location.getCurrentPositionAsync({});
-
     const place = await Location.reverseGeocodeAsync({
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
     });
-
     setLocation({
       lon: location.coords.longitude,
       lat: location.coords.latitude,
@@ -78,7 +102,7 @@ const Home = ({ navigation, route }) => {
   };
 
   const getWeatherInfo = async () => {
-    console.log("got here");
+    setIsLoading(true);
     const url = `https://api.openweathermap.org/data/2.5/onecall?lat=${location.lat}&lon=${location.lon}&units=imperial&appid=f68a2c64528807e012d6fe72a8755f7e`;
     axios
       .get(url)
@@ -91,6 +115,9 @@ const Home = ({ navigation, route }) => {
           description:
             "Something went wrong. Please come back later and try again.",
         });
+      })
+      .finally(() => {
+        setTimeout(() => setIsLoading(false), 1000);
       });
   };
 
@@ -136,13 +163,21 @@ const Home = ({ navigation, route }) => {
               <Text style={styles.descriptionText}>
                 {weatherResponse.current.weather[0].description}
               </Text>
-              <Ionicons
-                name="ios-refresh"
-                size={18}
-                color="white"
-                style={{ marginTop: -10, marginLeft: 8 }}
-                onPress={() => getWeatherInfo()}
-              />
+              {isLoading ? (
+                <ActivityIndicator
+                  size="small"
+                  color="#fff"
+                  style={{ marginTop: -10, marginLeft: 6 }}
+                />
+              ) : (
+                <Ionicons
+                  name="ios-refresh"
+                  size={18}
+                  color="white"
+                  style={{ marginTop: -10, marginLeft: 8 }}
+                  onPress={() => getWeatherInfo()}
+                />
+              )}
             </View>
           </View>
           {/* ------------------------------------------------------------------------------------------------------------------- */}
@@ -521,5 +556,8 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     lineHeight: 25,
     textAlign: "center",
+  },
+  icons: {
+    padding: 20,
   },
 });
